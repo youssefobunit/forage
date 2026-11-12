@@ -17,6 +17,12 @@ create policy "admins_read_device_sessions" on public.forage_device_sessions
 create or replace function public.record_forage_device_login(p_label text, p_nonce text)
 returns void language plpgsql security definer set search_path = public as $$
 begin
+  -- Also retain the administrator's device: administrators bypass approval,
+  -- but their phone must still be visible in the device activity list.
+  insert into public.trusted_devices(user_id, device_id, device_label, is_primary, access_status, last_seen_at)
+  values(auth.uid(), public.current_forage_device_id(), coalesce(p_label,'Appareil inconnu'), false, 'active', now())
+  on conflict (user_id, device_id) do update
+    set device_label=excluded.device_label, last_seen_at=now();
   insert into public.forage_device_sessions(user_id, device_id, device_label, login_nonce)
   values(auth.uid(), public.current_forage_device_id(), coalesce(p_label,'Appareil inconnu'), p_nonce);
 end;
