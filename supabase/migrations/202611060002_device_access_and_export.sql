@@ -292,6 +292,7 @@ using (user_id = auth.uid() or public.is_admin());
 -- Tighten the existing profile policies: team data is administrator-only,
 -- while every signed-in user can still read their own profile.
 drop policy if exists "read_profiles" on public.profiles;
+drop policy if exists "read_own_or_admin_profiles" on public.profiles;
 drop policy if exists "admin_manage_profiles" on public.profiles;
 create policy "read_own_or_admin_profiles"
 on public.profiles for select to authenticated
@@ -310,9 +311,15 @@ create table if not exists public.workshop_snapshots (
 alter table public.workshop_snapshots enable row level security;
 drop policy if exists "authenticated_read_workshop_snapshot"
   on public.workshop_snapshots;
+drop policy if exists "approved_read_workshop_snapshot"
+  on public.workshop_snapshots;
 drop policy if exists "staff_create_workshop_snapshot"
   on public.workshop_snapshots;
+drop policy if exists "approved_create_workshop_snapshot"
+  on public.workshop_snapshots;
 drop policy if exists "staff_update_workshop_snapshot"
+  on public.workshop_snapshots;
+drop policy if exists "approved_update_workshop_snapshot"
   on public.workshop_snapshots;
 create policy "approved_read_workshop_snapshot"
 on public.workshop_snapshots for select to authenticated
