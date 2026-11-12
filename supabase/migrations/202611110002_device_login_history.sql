@@ -11,6 +11,7 @@ create table if not exists public.forage_device_sessions (
 create index if not exists forage_device_sessions_latest_idx
   on public.forage_device_sessions(user_id, device_id, logged_in_at desc);
 alter table public.forage_device_sessions enable row level security;
+drop policy if exists "admins_read_device_sessions" on public.forage_device_sessions;
 create policy "admins_read_device_sessions" on public.forage_device_sessions
   for select to authenticated using (public.is_admin());
 
